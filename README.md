@@ -8,8 +8,9 @@
 tinyudp::connect(address: &str) -> Result<UdpSocket>
 tinyudp::send(address: &str, message: &[u8]) -> Result<()>
 tinyudp::read(socket: &UdpSocket, options: &ReadOptions) -> Result<Vec<u8>>
+tinyudp::send_and_read(address: &str, message: &[u8], read_options: &ReadOptions) -> Result<Vec<u8>>
 
-pub struct ReadOptions {
+struct ReadOptions {
     pub timeout: Option<Duration>,
     pub buffer_size: usize,
 }
