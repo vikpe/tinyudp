@@ -5,9 +5,8 @@
 ## Overview
 
 ```rust
-tinyudp::connect(address: &str) -> Result<UdpSocket>
-tinyudp::send(address: &str, message: &[u8]) -> Result<()>
-tinyudp::read(socket: &UdpSocket, options: &ReadOptions) -> Result<Vec<u8>>
+tinyudp::send(address: &str, message: &[u8]) -> Result<usize>
+tinyudp::read(address: &str, options: &ReadOptions) -> Result<Vec<u8>>
 tinyudp::send_and_read(address: &str, message: &[u8], read_options: &ReadOptions) -> Result<Vec<u8>>
 
 struct ReadOptions {

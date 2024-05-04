@@ -19,35 +19,59 @@ impl Default for ReadOptions {
     }
 }
 
-pub fn connect(address: &str) -> Result<UdpSocket> {
-    let from_address = (Ipv4Addr::UNSPECIFIED, 0);
-    let socket = UdpSocket::bind(from_address).map_err(|e| e!("tinyudp::connect: {}", e))?;
-    socket.connect(address)?;
-    Ok(socket)
+pub struct Client {
+    socket: UdpSocket,
 }
 
-pub fn send(address: &str, message: &[u8]) -> Result<UdpSocket> {
-    let socket = connect(address)?;
-    socket
-        .send(message)
-        .map_err(|e| e!("tinyudp::send: {}", e))?;
-    Ok(socket)
+impl Client {
+    pub fn new(bind_address: (Ipv4Addr, u16)) -> Result<Self> {
+        let socket = UdpSocket::bind(bind_address).map_err(|e| e!("tinyudp::bind: {}", e))?;
+        Ok(Self { socket })
+    }
+
+    pub fn new_unspecified() -> Result<Self> {
+        Self::new((Ipv4Addr::UNSPECIFIED, 0))
+    }
+
+    fn send(&self, address: &str, message: &[u8]) -> Result<usize> {
+        self.socket
+            .send_to(message, address)
+            .map_err(|e| e!("tinyudp::send: {}", e))
+    }
+
+    fn read(&self, address: &str, options: &ReadOptions) -> Result<Vec<u8>> {
+        self.socket.connect(address)?;
+        self.socket.set_read_timeout(options.timeout)?;
+        let mut buffer: Vec<u8> = vec![0; options.buffer_size];
+        let bytes_read = self
+            .socket
+            .recv(&mut buffer)
+            .map_err(|e| e!("tinyudp::read: {}", e))?;
+
+        let response = &buffer[..bytes_read];
+
+        Ok(Vec::from(response))
+    }
+
+    fn send_and_read(
+        &self,
+        address: &str,
+        message: &[u8],
+        read_options: &ReadOptions,
+    ) -> Result<Vec<u8>> {
+        self.send(address, message)?;
+        self.read(address, read_options)
+    }
 }
 
-pub fn read(socket: &UdpSocket, options: &ReadOptions) -> Result<Vec<u8>> {
-    socket.set_read_timeout(options.timeout)?;
+pub fn send(address: &str, message: &[u8]) -> Result<usize> {
+    Client::new_unspecified()?.send(address, message)
+}
 
-    let mut buffer: Vec<u8> = vec![0; options.buffer_size];
-    let bytes_read = socket
-        .recv(&mut buffer)
-        .map_err(|e| e!("tinyudp::read: {}", e))?;
-
-    let response = &buffer[..bytes_read];
-
-    Ok(Vec::from(response))
+pub fn read(address: &str, options: &ReadOptions) -> Result<Vec<u8>> {
+    Client::new_unspecified()?.read(address, options)
 }
 
 pub fn send_and_read(address: &str, message: &[u8], read_options: &ReadOptions) -> Result<Vec<u8>> {
-    let socket = send(address, message)?;
-    read(&socket, read_options)
+    Client::new_unspecified()?.send_and_read(address, message, read_options)
 }
