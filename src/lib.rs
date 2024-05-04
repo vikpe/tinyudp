@@ -14,7 +14,7 @@ impl Default for ReadOptions {
     fn default() -> Self {
         ReadOptions {
             timeout: None,
-            buffer_size: 8 * 1024, // 8 kb
+            buffer_size: 32 * 1024, // 32 kb
         }
     }
 }
