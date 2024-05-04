@@ -4,15 +4,13 @@ description = "A tiny abstraction for UDP."
 keywords = ["udp"]
 repository = "https://github.com/vikpe/tinyudp"
 authors = ["Viktor Persson <viktor.persson@arcsin.se>"]
-version = "0.2.1"
+version = "0.3.0"
 edition = "2021"
 license = "MIT"
 include = [
     "/Cargo.toml",
-    "/LICENSE",
     "/README.md",
     "/src/**",
-    "/tests/**",
 ]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

@@ -1,6 +1,6 @@
 //! # tinyudp
 //! A tiny abstraction for UDP.
-use std::net::{Ipv4Addr, UdpSocket};
+use std::net::{Ipv4Addr, SocketAddrV4, UdpSocket};
 use std::time::Duration;
 
 use anyhow::{anyhow as e, Result};
@@ -19,27 +19,32 @@ impl Default for ReadOptions {
     }
 }
 
+/// A UDP client that reuses the same socket for all operations.
 pub struct Client {
     socket: UdpSocket,
 }
 
 impl Client {
-    pub fn new(bind_address: (Ipv4Addr, u16)) -> Result<Self> {
+    /// Create a new UDP client bound to the specified address.
+    pub fn new(bind_address: &SocketAddrV4) -> Result<Self> {
         let socket = UdpSocket::bind(bind_address).map_err(|e| e!("tinyudp::bind: {}", e))?;
         Ok(Self { socket })
     }
 
+    /// Create a new UDP client bound to an unspecified address.
     pub fn new_unspecified() -> Result<Self> {
-        Self::new((Ipv4Addr::UNSPECIFIED, 0))
+        Self::new(&SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 0))
     }
 
-    fn send(&self, address: &str, message: &[u8]) -> Result<usize> {
+    /// Send a message to the specified address.
+    fn send(&self, address: &SocketAddrV4, message: &[u8]) -> Result<usize> {
         self.socket
             .send_to(message, address)
             .map_err(|e| e!("tinyudp::send: {}", e))
     }
 
-    fn read(&self, address: &str, options: &ReadOptions) -> Result<Vec<u8>> {
+    /// Read a message from the specified address.
+    fn read(&self, address: &SocketAddrV4, options: &ReadOptions) -> Result<Vec<u8>> {
         self.socket.connect(address)?;
         self.socket.set_read_timeout(options.timeout)?;
         let mut buffer: Vec<u8> = vec![0; options.buffer_size];
@@ -53,9 +58,10 @@ impl Client {
         Ok(Vec::from(response))
     }
 
+    /// Send a message to the specified address and read the response.
     fn send_and_read(
         &self,
-        address: &str,
+        address: &SocketAddrV4,
         message: &[u8],
         read_options: &ReadOptions,
     ) -> Result<Vec<u8>> {
@@ -64,14 +70,20 @@ impl Client {
     }
 }
 
-pub fn send(address: &str, message: &[u8]) -> Result<usize> {
+/// Send a message to the specified address.
+pub fn send(address: &SocketAddrV4, message: &[u8]) -> Result<usize> {
     Client::new_unspecified()?.send(address, message)
 }
 
-pub fn read(address: &str, options: &ReadOptions) -> Result<Vec<u8>> {
+/// Read a message from the specified address.
+pub fn read(address: &SocketAddrV4, options: &ReadOptions) -> Result<Vec<u8>> {
     Client::new_unspecified()?.read(address, options)
 }
 
-pub fn send_and_read(address: &str, message: &[u8], read_options: &ReadOptions) -> Result<Vec<u8>> {
+pub fn send_and_read(
+    address: &SocketAddrV4,
+    message: &[u8],
+    read_options: &ReadOptions,
+) -> Result<Vec<u8>> {
     Client::new_unspecified()?.send_and_read(address, message, read_options)
 }
