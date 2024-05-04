@@ -26,24 +26,22 @@ tinyudp::send("quake.se", &b"hello")?;
 ### Read
 
 ```rust
-let socket = tinyudp::connect("quake.se")?;
 let options = tinyudp::ReadOptions{
     timeout: Some(Duration::from_secs(1)),
     buffer_size: 8 * 1024,
 };
-let response = tinyudp::read(&socket, &options)?;
+let response = tinyudp::read("quake.se", &options)?;
 ```
 
 ### Send and read
 
 ```rust
-let message = b"hello";
 let options = tinyudp::ReadOptions{
     timeout: Some(Duration::from_secs(1)),
     buffer_size: 8 * 1024,
 };
 
-match tinyudp::send_and_read("quake.se", &message, &options) {
+match tinyudp::send_and_read("quake.se", &b"hello", &options) {
     Ok(response) => {
         println!("response: {:?}", response);
     },
