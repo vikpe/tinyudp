@@ -5,9 +5,9 @@
 ## Overview
 
 ```rust
-tinyudp::send(address: &SocketAddrV4, message: &[u8]) -> Result<usize>
-tinyudp::read(address: &SocketAddrV4, options: &ReadOptions) -> Result<Vec<u8>>
-tinyudp::send_and_read(address: &SocketAddrV4, message: &[u8], read_options: &ReadOptions) -> Result<Vec<u8>>
+tinyudp::send(address: impl ToSocketAddrs, message: &[u8]) -> Result<usize>
+tinyudp::read(address: impl ToSocketAddrs, options: &ReadOptions) -> Result<Vec<u8>>
+tinyudp::send_and_read(address: impl ToSocketAddrs, message: &[u8], read_options: &ReadOptions) -> Result<Vec<u8>>
 
 struct ReadOptions {
     pub timeout: Option<Duration>,
@@ -20,7 +20,7 @@ struct ReadOptions {
 ### Send
 
 ```rust
-tinyudp::send("quake.se:28000".parse()?, &b"hello")?;
+tinyudp::send("quake.se:28000", &b"hello")?;
 ```
 
 ### Read
@@ -30,7 +30,7 @@ let options = tinyudp::ReadOptions{
     timeout: Some(Duration::from_secs(1)),
     buffer_size: 8 * 1024,
 };
-let response = tinyudp::read("quake.se:28000".parse()?, &options)?;
+let response = tinyudp::read("quake.se:28000", &options)?;
 ```
 
 ### Send and read
@@ -41,7 +41,7 @@ let options = tinyudp::ReadOptions{
     buffer_size: 8 * 1024,
 };
 
-match tinyudp::send_and_read("quake.se:28000".parse()?, &b"hello", &options) {
+match tinyudp::send_and_read("quake.se:28000", &b"hello", &options) {
     Ok(response) => {
         println!("response: {:?}", response);
     },
