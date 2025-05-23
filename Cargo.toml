@@ -4,7 +4,7 @@ description = "A tiny abstraction for UDP."
 keywords = ["udp", "async"]
 repository = "https://github.com/vikpe/tinyudp"
 authors = ["Viktor Persson <viktor.persson@arcsin.se>"]
-version = "0.5.1"
+version = "0.6.0"
 edition = "2024"
 license = "MIT"
 include = [
@@ -13,12 +13,15 @@ include = [
     "/src/**",
 ]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-anyhow = "1.0.97"
 thiserror = "2.0.12"
-tokio = { version = "1.44.1", features = ["macros", "net", "rt-multi-thread", "sync", "time"] }
+
+# optional
+tokio = { version = "1.44.1", optional = true, features = ["macros", "net", "rt-multi-thread", "sync", "time"] }
+
+[dev-dependencies]
+anyhow = "1.0.97"
 
 [features]
 ci = []
+tokio = ["dep:tokio"]
